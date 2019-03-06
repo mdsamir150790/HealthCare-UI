@@ -20,10 +20,10 @@ In the project directory run the following command :
 
 ### `npm run build`
 
-This will build the app for deployment to production server.Files to be deployed can be found under the build folder.
+This will build the app for deployment to production server. Files to be deployed can be found under the build folder.
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
 The build is minified and the filenames include the hashes.
-Your app is ready to be deployed!
+The app is ready to be deployed!
 
 
