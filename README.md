@@ -14,7 +14,7 @@ In the project directory run the following command :
 
 This will start the development server with you application in it. Open http://localhost:3000 to view it in the browser.
 
-## Building the application for deploymet to server 
+## Building the application for deployment to server 
 
 In the project directory run the following command :
 
