@@ -58,7 +58,11 @@ class MemberTableRow extends Component {
                     <td colSpan="4">
                         <div id={'collapseMemberId'+ memberDetails.employeeId} className="collapse" aria-labelledby={'memberId'+ memberDetails.employeeId} data-parent="#memberAccordion">
                             <div className="member-claim-details-content">
-                                { this.state.loading ? <LoadingSpinner spinnerMessage={'Loading Claim Details'}/> : <ClaimComponent claimDetails={this.state.claimDetails} electionAmount={employerDetails.electionAmount}/> }   
+                                { 
+                                    this.state.loading ? 
+                                    <LoadingSpinner spinnerMessage={'Loading Claim Details'}/> : 
+                                    this.state.claimsLoaded ? <ClaimComponent claimDetails={this.state.claimDetails} electionAmount={employerDetails.electionAmount}/> : <React.Fragment><p className="errorMessage">Unable to Fetch Data. Service Might be down. Please try later.</p></React.Fragment> 
+                                }   
                             </div>
                         </div>
                     </td>  

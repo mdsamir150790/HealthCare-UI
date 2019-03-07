@@ -16,7 +16,9 @@ class MemberComponent extends Component{
         componentMessage : 'Search for Employer to see member details',
         loading: false,
         adding: false,
-        addMemberMessage : ''
+        addMemberMessage : '',
+        errorMsg : false,
+        apiSuccess : false
     }
 
     componentWillReceiveProps({employerDetails}){
@@ -27,17 +29,17 @@ class MemberComponent extends Component{
 
     getMemberDetailsFromAPI = () => {
         if(this.state.employerDetails.employerId !== ''){
-            this.setState({ loading: true }, () => {
+            this.setState({ errorMsg : false, apiSuccess : false, addMemberMessage : '', loading: true }, () => {
                             axios.get(API_ROOT+'/employer/'+this.state.employerDetails.employerId)
                             .then( res1=> {
                                             if( res1.data !== '' ){
                                                 this.setState({ memberDetails : res1.data, loading: false});
                                             } else {
-                                                this.setState({ componentMessage : 'No data found', memberDetails : null, loading: false});
+                                                this.setState({ componentMessage : 'No data found', memberDetails : null, loading: false, errorMsg : true });
                                             }
                              }).catch(error => {
                                 console.log(error);
-                                this.setState({ componentMessage : 'Unable to fetch data', memberDetails : null, loading: false});
+                                this.setState({ componentMessage : 'Unable to fetch data. Service might be down. Please try later.', memberDetails : null, loading: false, errorMsg : true });
                             })
                         });
         } else {
@@ -47,7 +49,7 @@ class MemberComponent extends Component{
 
     addMemberDetailUsingAPI = (formfields) => {
         if(this.state.employerDetails.employerId !== ''){
-            this.setState({ adding: true }, () => {
+            this.setState({ errorMsg : false, apiSuccess : false, adding: true }, () => {
                             axios.post(API_ROOT, {
                                 employerId : this.state.employerDetails.employerId,
                                 firstName : formfields.firstName,
@@ -59,13 +61,13 @@ class MemberComponent extends Component{
                                             if( res.data !== '' ){
                                                 let tempMemberDetails = this.state.memberDetails;
                                                 tempMemberDetails.push(res.data);
-                                                this.setState({ memberDetails : tempMemberDetails , adding: false, addMemberMessage : 'Successfully added member'});
+                                                this.setState({ memberDetails : tempMemberDetails , adding: false, addMemberMessage : 'Successfully added member', apiSuccess : true });
                                             } else {
-                                                this.setState({ addMemberMessage : 'Unable to add Member', adding: false});
+                                                this.setState({ addMemberMessage : 'Unable to add Member. Service might be down. Please try later.', adding: false, errorMsg : true});
                                             }
                              }).catch(error => {
                                 console.log(error);
-                                this.setState({ addMemberMessage : 'Unable to add Member', adding: false});
+                                this.setState({ addMemberMessage : 'Unable to add Member. Service might be down. Please try later.', adding: false, errorMsg : true });
                             })
                         });
         }
@@ -81,6 +83,12 @@ class MemberComponent extends Component{
         this.addMemberDetailUsingAPI(formFields);
     }
 
+    handleFormErrors = (formHasErrors) => {
+        if(formHasErrors){
+            this.setState({ addMemberMessage : '' });
+        }
+    }
+
     getDashboardContent = () => {
         if(this.state.memberDetails !== null){
             return <React.Fragment>
@@ -93,8 +101,8 @@ class MemberComponent extends Component{
                                 </div>
                                 <div id="addMemberForm" className="collapse" aria-labelledby="addMemberLink" data-parent="#addMemberAccordion">
                                     <div className="member-add-form">
-                                        <AddMemberForm onAddMember={this.handleAddMemberSubmit}/>
-                                        { this.state.adding ? <LoadingSpinner spinnerMessage={'Adding Member Details'}/> : this.state.addMemberMessage }
+                                        <AddMemberForm onAddMember={this.handleAddMemberSubmit} hasFormErrors={this.handleFormErrors} />
+                                        <p className={ this.state.errorMsg ? "errorMessage" : this.state.apiSuccess ? "successMessage" : "" }>{ this.state.adding ? <LoadingSpinner spinnerMessage={'Adding Member Details'}/> : this.state.addMemberMessage }</p>
                                     </div>
                                     
                                 </div>    
@@ -117,7 +125,7 @@ class MemberComponent extends Component{
         }
         else{
             return <React.Fragment>
-                <p>{ this.state.componentMessage}</p>
+                <p className={ this.state.errorMsg ? "errorMessage" : "" }>{ this.state.componentMessage}</p>
             </React.Fragment>
         } 
     }

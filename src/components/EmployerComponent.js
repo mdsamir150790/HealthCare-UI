@@ -23,7 +23,9 @@ class EmployerComponent extends Component{
         loading : false,
         showElectionEdit: false,
         updatingElection : false,
-        updateMessage : ''
+        updateMessage : '',
+        errorMsg : false,
+        apiSuccess : false
     }
 
     searchForId = (searchId) => {
@@ -36,16 +38,16 @@ class EmployerComponent extends Component{
                                                 this.setState({ employerDetails : res.data, loading: false});
                                             } else {
                                                 this.props.employerData({ employerId : '' });
-                                                this.setState({ componentMessage : 'No data found', employerDetails : null, loading: false});
+                                                this.setState({ componentMessage : 'No data found', employerDetails : null, loading: false, errorMsg : true });
                                             }
                              }).catch(error => {
                                 console.log(error);
                                 this.props.employerData({ employerId : '' });
-                                this.setState({ componentMessage : 'Unable to fetch data', employerDetails : null, loading: false});
+                                this.setState({ componentMessage : 'Unable to fetch data. Service might be down. Please try later.', employerDetails : null, loading: false, errorMsg : true});
                             })
                         });
         } else {
-            this.setState({ componentMessage : 'Id cannot be blank', employerDetails : null});
+            this.setState({ componentMessage : 'Id cannot be blank', employerDetails : null, errorMsg : true});
         } 
     }
 
@@ -59,25 +61,23 @@ class EmployerComponent extends Component{
 
     updateElection = () => {
         if(this.refs.electionAmount.value !== ''){
-            this.setState({ updatingElection: true}, () => {
+            this.setState({ errorMsg : false, apiSuccess : false,updatingElection: true }, () => {
                 axios.put(API_ROOT + '/'+ this.state.employerDetails.employerId , {
-                    employerId : this.state.employerDetails.employerId,
-                    employerName : this.state.employerDetails.employerName,
                     electionAmount : this.refs.electionAmount.value
                 }).then( res => {
                     if(res.data !== ''){
                         this.props.employerData(res.data);
-                        this.setState({ employerDetails : res.data , updateMessage : 'Successfully Updated Election Amount', updatingElection: false, editElection: false})
+                        this.setState({ employerDetails : res.data , updateMessage : 'Successfully Updated Election Amount', updatingElection: false, editElection: false, apiSuccess : true })
                     } else {
-                        this.setState({ updateMessage : 'Unable to update election amount.', updatingElection: false, editElection: false})
+                        this.setState({ updateMessage : 'Unable to perform update. Service might be down. Please try later.', updatingElection: false, editElection: false, errorMsg : true})
                     }
                 }).catch(error => {
                     console.log(error)
-                    this.setState({ updateMessage : 'Unable to update election amount.', updatingElection: false, editElection: false})
+                    this.setState({ updateMessage : 'Unable to perform update. Service might be down. Please try later.', updatingElection: false, editElection: false, errorMsg : true})
                 })
             });
         } else {
-            this.setState({ updateMessage : 'Election amount cannot be empty'});
+            this.setState({ updateMessage : 'Election amount cannot be empty', errorMsg : true });
         }
         
     }
@@ -110,12 +110,12 @@ class EmployerComponent extends Component{
                                 </React.Fragment>
                             }    
                         </p>
-                        <p>{ this.state.updatingElection ? <LoadingSpinner spinnerMessage={'Updating'}/> : this.state.updateMessage }</p>
+                        <p className={ this.state.errorMsg ? "errorMessage" : this.state.apiSuccess ? "successMessage" : "" }>{ this.state.updatingElection ? <LoadingSpinner spinnerMessage={'Updating'}/> : this.state.updateMessage }</p>
                     </React.Fragment>
         }
         else{
             return <React.Fragment>
-                        <p>{ this.state.componentMessage}</p>
+                        <p className={ this.state.errorMsg ? "errorMessage" : "" }>{ this.state.componentMessage}</p>
                     </React.Fragment>
         } 
     }

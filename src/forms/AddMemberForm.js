@@ -16,6 +16,8 @@ class AddMemberForm extends Component {
                 address1 : this.refs.address1.value.trim(),
                 address2 : this.refs.address2.value.trim()
             });
+        } else {
+            this.props.hasFormErrors(true);
         }
     }
 
